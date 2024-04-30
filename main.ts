@@ -4,28 +4,6 @@ import { TileMap } from './TileMap';
 import { Direction, DirectionEnum } from './DirectionUtils';
 
 // Initialization and application setup here
-async function loadConfiguration() {
-    const colorResponse = await fetch('./colors.json');
-    const positionResponse = await fetch('./positions.json');
-    const colorsJson = await colorResponse.json();
-    const positionsJson = await positionResponse.json();
-
-    const initColors: { [key: string]: pc.Color } = {};
-    Object.keys(colorsJson).forEach(key => {
-        const [r, g, b] = colorsJson[key];
-        initColors[key] = new pc.Color(r, g, b);
-    });
-
-    const tiles = new TileMap();
-
-    Object.keys(positionsJson).forEach(key => {
-        const [x, z] = positionsJson[key];
-        const posVec = new pc.Vec3(x, -0.5, z);
-        new Tile(key, tiles, app, posVec, initColors[key]);
-    });
-
-    return tiles;
-}
 
 // Define interfaces for better type-checking
 interface Movement {
@@ -49,8 +27,7 @@ light.addComponent('light');
 light.setEulerAngles(45, 0, 0);
 app.root.addChild(light);
 
-// const tiles: Promise<TileMap> = loadConfiguration();
-const tiles: TileMap = await loadConfiguration();
+const tiles = new TileMap(app);
 
 // Box setup
 const box: pc.Entity = new pc.Entity('box');
@@ -145,7 +122,7 @@ app.on('update', (dt: number): void => {
 
 
     const boxPos = box.getPosition();
-    const centerPos = tiles.getTile("CC").getEntity().getPosition();  
+    const centerPos = tiles.getTile("CC").getEntity().getPosition();
 
     // Determine boundary crossing
     if (Math.abs(boxPos.x - centerPos.x) > 5 || Math.abs(boxPos.z - centerPos.z) > 5) {
@@ -155,7 +132,6 @@ app.on('update', (dt: number): void => {
                     boxPos.z - centerPos.z >  5 ? DirectionEnum.N : DirectionEnum.S; // same here ...
         // Update all the panels for the next frame
         const direction: Direction = new Direction(dir);
-        console.log(dir);
 
         // The following order is fundamental, do not mess it up
         let tmpColor: pc.Color = tiles.getTile(direction.getOpposite().repeat(2)).getColor();
