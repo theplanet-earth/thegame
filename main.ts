@@ -4,6 +4,39 @@ import { TileMap } from './TileMap';
 import { Direction, DirectionEnum } from './DirectionUtils';
 
 // Initialization and application setup here
+async function fetchGLB(url: string): Promise<Blob> {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.blob();
+}
+function loadGLBFromBlob(blob: Blob, onLoad: (container: pc.Entity) => void) {
+    const url = URL.createObjectURL(blob);
+    const asset = new pc.Asset('characterModel', 'container', { url: url });
+    app.assets.add(asset);
+    app.assets.load(asset);
+    asset.on('load', () => {
+        const container = asset.resource.instantiateRenderEntity();
+        onLoad(container);
+    });
+    asset.on('error', (err, asset) => {
+        console.error('Error loading asset:', err);
+    });
+}
+async function initializeCharacter() {
+    try {
+        const blob = await fetchGLB('https://nestjs-deal.vercel.app/buildings/filename/418340124935418390124985.glb');
+        loadGLBFromBlob(blob, (model) => {
+            app.root.addChild(model);
+        });
+    } catch (error) {
+        console.error('Failed to load character:', error);
+    }
+}
+
+initializeCharacter();
+
 
 // Define interfaces for better type-checking
 interface Movement {
