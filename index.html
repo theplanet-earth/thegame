@@ -1,13 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <style>
-            body { margin: 0; overflow: hidden; }
-        </style>
-    </head>
-    <body>
-        <script type="module" src="main.ts"></script>
-        <canvas id='application'></canvas>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Planet</title>
+</head>
+<body>
+    <script type="module" src="main.ts"></script>
+    <canvas id="application"></canvas>
+
+    <script>
+        // Function to get coordinates from URL
+        function getCoordinates() {
+            const path = window.location.pathname;
+            const parts = path.split('@')[1]; // assuming URL format is /@lat,lng
+            if (parts) {
+                const coords = parts.split(',');
+                if (coords.length === 2) {
+                    const lat = parseFloat(coords[0]);
+                    const lng = parseFloat(coords[1]);
+                    return { lat, lng };
+                }
+            }
+            return null;
+        }
+
+        // Wait for the DOM to be fully loaded
+        document.addEventListener('appReady', (event) => {
+            const app = event.detail.app; // Now you have access to the app instance
+            const coordinates = getCoordinates();
+            if (coordinates) {
+                app.fire('initialize:coordinates', coordinates);
+            }
+        });
+        // document.addEventListener('DOMContentLoaded', () => {
+        //     const coordinates = getCoordinates();
+
+        //     // Assuming `app` is your PlayCanvas application instance
+        //     if (app && coordinates) {
+        //         app.fire('initialize:coordinates', coordinates);
+        //     }
+        // });
+    </script>
+</body>
 </html>

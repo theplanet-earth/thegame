@@ -24,9 +24,30 @@ function loadGLBFromBlob(blob: Blob, onLoad: (container: pc.Entity) => void) {
         console.error('Error loading asset:', err);
     });
 }
-async function initializeCharacter() {
+
+// Helper function to format the filename
+function getTileFilename(lat: number, lng: number): string {
+    var gridInterval = 0.005; // degrees, adjust size of grid cells
+    const minLat = Math.floor((lat - 41.8240) / gridInterval) * gridInterval + 41.8240;
+    const minLng = Math.floor((lng - 12.4435) / gridInterval) * gridInterval + 12.4435;
+    const maxLat = minLat + gridInterval;
+    const maxLng = minLng + gridInterval;
+
+    // Convert to a string with no decimal points
+    const minLatStr = (minLat * 10000).toFixed(0);
+    const minLngStr = (minLng * 10000).toFixed(0);
+    const maxLatStr = (maxLat * 10000).toFixed(0);
+    const maxLngStr = (maxLng * 10000).toFixed(0);
+
+    return `${minLatStr}${minLngStr}${maxLatStr}${maxLngStr}`;
+}
+
+// Updated initialization function using dynamic coordinates
+async function initializeCharacter(lat: number, lng: number) {
     try {
-        const blob = await fetchGLB('https://nestjs-deal.vercel.app/buildings/filename/418340124935418390124985.glb');
+        const filename = getTileFilename(lat, lng);
+        console.log('Coordinates received:', filename);
+        const blob = await fetchGLB(`https://nestjs-deal.vercel.app/buildings/filename/${filename}.glb`);
         loadGLBFromBlob(blob, (model) => {
             app.root.addChild(model);
         });
@@ -34,9 +55,6 @@ async function initializeCharacter() {
         console.error('Failed to load character:', error);
     }
 }
-
-initializeCharacter();
-
 
 // Define interfaces for better type-checking
 interface Movement {
@@ -50,9 +68,20 @@ const canvas: HTMLCanvasElement = document.getElementById('application') as HTML
 const app: pc.Application = new pc.Application(canvas, {
     keyboard: new pc.Keyboard(window)
 });
+
 app.setCanvasResolution(pc.RESOLUTION_AUTO);
 app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
+
+app.on('initialize:coordinates', (coordinates) => {
+    console.log('Coordinates received:', coordinates);
+    // You can now use these coordinates to influence the game, such as setting an initial player position, etc.
+    initializeCharacter(coordinates.lat, coordinates.lng);
+});
+
 app.start();
+
+// After app is fully configured
+document.dispatchEvent(new CustomEvent('appReady', { detail: { app } }));
 
 // Lighting setup
 const light: pc.Entity = new pc.Entity('light');
@@ -88,7 +117,7 @@ app.root.addChild(camera);
 
 // Movement details
 const movement: Movement = {
-    speed: 5,
+    speed: 50,
     rotateSpeed: 50,
     zoomSpeed: 20
 };
