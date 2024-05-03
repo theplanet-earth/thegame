@@ -42,18 +42,59 @@ function getTileFilename(lat: number, lng: number): string {
     return `${minLatStr}${minLngStr}${maxLatStr}${maxLngStr}`;
 }
 
+// Function to initialize all surrounding tiles including the center
+async function initializeSurroundingTiles(centerLat: number, centerLng: number) {
+    const delta = 0.005; // degrees shift for surrounding tiles
+
+    for (let dLat = -delta; dLat <= delta; dLat += delta) {
+        for (let dLng = -delta; dLng <= delta; dLng += delta) {
+            // Skip the central tile here if already loaded, or handle as needed
+            if (dLat === 0 && dLng === 0) continue;
+
+            const lat = centerLat + dLat;
+            const lng = centerLng + dLng;
+            initializeCharacter(lat, lng, centerLat, centerLng);
+        }
+    }
+}
+
 // Updated initialization function using dynamic coordinates
-async function initializeCharacter(lat: number, lng: number) {
+async function initializeCharacter(lat: number, lng: number, centerLat: number, centerLng: number) {
     try {
         const filename = getTileFilename(lat, lng);
         console.log('Coordinates received:', filename);
         const blob = await fetchGLB(`https://nestjs-deal.vercel.app/buildings/filename/${filename}.glb`);
         loadGLBFromBlob(blob, (model) => {
+            model.setLocalPosition(calculatePositionFromCenter(lat, lng, centerLat, centerLng));
             app.root.addChild(model);
         });
     } catch (error) {
         console.error('Failed to load character:', error);
     }
+}
+
+function measure(lat1, lon1, lat2, lon2){  // generally used geo measurement function
+    var R = 6378.137; // Radius of earth in KM
+    var dLat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
+    var dLon = lon2 * Math.PI / 180 - lon1 * Math.PI / 180;
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    var d = R * c;
+    return d * 1000; // meters
+}
+
+// Calculate position based on Haversine formula to place each model
+function calculatePositionFromCenter(lat: number, lng: number, centerLat: number, centerLng: number): pc.Vec3 {
+    const distanceLat = measure(centerLat, centerLng, lat, centerLng);
+    const distanceLng = measure(centerLat, centerLng, centerLat, lng);
+
+    // Determine direction to place tiles correctly in relation to the center
+    const dirLat = lat > centerLat ? 1 : -1;
+    const dirLng = lng > centerLng ? 1 : -1;
+
+    return new pc.Vec3(distanceLng * dirLng, 0, distanceLat * dirLat);
 }
 
 // Define interfaces for better type-checking
@@ -75,7 +116,8 @@ app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
 app.on('initialize:coordinates', (coordinates) => {
     console.log('Coordinates received:', coordinates);
     // You can now use these coordinates to influence the game, such as setting an initial player position, etc.
-    initializeCharacter(coordinates.lat, coordinates.lng);
+    initializeCharacter(coordinates.lat, coordinates.lng, coordinates.lat, coordinates.lng);
+    initializeSurroundingTiles(coordinates.lat, coordinates.lng);
 });
 
 app.start();
