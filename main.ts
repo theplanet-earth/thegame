@@ -13,7 +13,7 @@ async function fetchGLB(url: string): Promise<Blob> {
 }
 function loadGLBFromBlob(blob: Blob, onLoad: (container: pc.Entity) => void) {
     const url = URL.createObjectURL(blob);
-    const asset = new pc.Asset('characterModel', 'container', { url: url });
+    const asset = new pc.Asset('tileModel', 'container', { url: url });
     app.assets.add(asset);
     app.assets.load(asset);
     asset.on('load', () => {
@@ -43,33 +43,57 @@ function getTileFilename(lat: number, lng: number): string {
 }
 
 // Function to initialize all surrounding tiles including the center
-async function initializeSurroundingTiles(centerLat: number, centerLng: number) {
-    const delta = 0.005; // degrees shift for surrounding tiles
+async function initializeTileMap(centerLat: number, centerLng: number) {
+    const colorResponse = await fetch('./colors.json');
+    const coordinatesResponse = await fetch('./coordinates.json');
+    const colorsJson = await colorResponse.json();
+    const coordinatesJson = await coordinatesResponse.json();
 
-    for (let dLat = -delta; dLat <= delta; dLat += delta) {
-        for (let dLng = -delta; dLng <= delta; dLng += delta) {
-            // Skip the central tile here if already loaded, or handle as needed
-            if (dLat === 0 && dLng === 0) continue;
-
-            const lat = centerLat + dLat;
-            const lng = centerLng + dLng;
-            initializeCharacter(lat, lng, centerLat, centerLng);
-        }
-    }
+    const initColors: { [key: string]: pc.Color } = {};
+    Object.keys(colorsJson).forEach(key => {
+        const [r, g, b] = colorsJson[key];
+        initColors[key] = new pc.Color(r, g, b);
+    });
+    for (const key of Object.keys(coordinatesJson)) {
+        const [dLng, dLat] = coordinatesJson[key];
+        const lat = centerLat - dLat; //odd pc z direction (downward)
+        const lng = centerLng + dLng;
+        initializeTile(lat, lng, centerLat, centerLng, initColors[key]);
+    };
 }
 
 // Updated initialization function using dynamic coordinates
-async function initializeCharacter(lat: number, lng: number, centerLat: number, centerLng: number) {
+async function initializeTile(lat: number, lng: number, centerLat: number, centerLng: number, color: pc.Color) {
     try {
         const filename = getTileFilename(lat, lng);
         console.log('Coordinates received:', filename);
         const blob = await fetchGLB(`https://nestjs-deal.vercel.app/buildings/filename/${filename}.glb`);
-        loadGLBFromBlob(blob, (model) => {
-            model.setLocalPosition(calculatePositionFromCenter(lat, lng, centerLat, centerLng));
-            app.root.addChild(model);
+        loadGLBFromBlob(blob, (modelEntity) => {
+            modelEntity.setLocalPosition(calculatePositionFromCenter(lat, lng, centerLat, centerLng));
+
+            // tmp : setting up the color for DEBUG only
+            const material = new pc.StandardMaterial();
+            material.diffuse = color;
+            material.update();
+
+            if (modelEntity.model) { // Ensure the entity has a model component               
+                // modelEntity.model.meshInstances.forEach(meshInstance => {
+                //     meshInstance.material = material;
+                // });
+                modelEntity.model.meshInstances[0].material = material;
+            } else if (modelEntity.children) {
+                modelEntity.children.forEach(child => {
+                    child.render.meshInstances.forEach(meshInstance => {
+                        meshInstance.material = material;
+                    });
+                });
+            } else {
+                console.error('Loaded entity does not have a model nor children components.');
+            }
+            app.root.addChild(modelEntity);
         });
     } catch (error) {
-        console.error('Failed to load character:', error);
+        console.error('Failed to load Tile:', error);
     }
 }
 
@@ -91,7 +115,7 @@ function calculatePositionFromCenter(lat: number, lng: number, centerLat: number
     const distanceLng = measure(centerLat, centerLng, centerLat, lng);
 
     // Determine direction to place tiles correctly in relation to the center
-    const dirLat = lat > centerLat ? 1 : -1;
+    const dirLat = lat > centerLat ? -1 : 1; //odd pc z direction (downward)
     const dirLng = lng > centerLng ? 1 : -1;
 
     return new pc.Vec3(distanceLng * dirLng, 0, distanceLat * dirLat);
@@ -116,8 +140,7 @@ app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
 app.on('initialize:coordinates', (coordinates) => {
     console.log('Coordinates received:', coordinates);
     // You can now use these coordinates to influence the game, such as setting an initial player position, etc.
-    initializeCharacter(coordinates.lat, coordinates.lng, coordinates.lat, coordinates.lng);
-    initializeSurroundingTiles(coordinates.lat, coordinates.lng);
+    initializeTileMap(coordinates.lat, coordinates.lng);
 });
 
 app.start();
