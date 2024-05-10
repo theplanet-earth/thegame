@@ -1,5 +1,5 @@
 import * as pc from 'playcanvas';
-import { Tile } from './Tile';
+import { Tile } from './tile';
 
 export class TileMap {
     private tiles: { [key: string]: Tile } = {};
@@ -14,8 +14,8 @@ export class TileMap {
     }
 
     async initialize(app: pc.Application) {
-        const colorResponse = await fetch('./colors.json');
-        const positionResponse = await fetch('./positions.json');
+        const colorResponse = await fetch('src/assets/colors.json');
+        const positionResponse = await fetch('src/assets/positions.json');
         const colorsJson = await colorResponse.json();
         const positionsJson = await positionResponse.json();
 

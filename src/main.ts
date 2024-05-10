@@ -1,7 +1,7 @@
 import * as pc from 'playcanvas';
-import { Tile, TileInterface } from './Tile';
-import { TileMap } from './TileMap';
-import { Direction, DirectionEnum } from './DirectionUtils';
+import { Tile, TileInterface } from './debug/tiles/tile';
+import { TileMap } from './debug/tiles/tileManager';
+import { Direction, DirectionEnum } from './game/utility';
 
 // Initialization and application setup here
 async function fetchGLB(url: string): Promise<Blob> {
@@ -44,8 +44,8 @@ function getTileFilename(lat: number, lng: number): string {
 
 // Function to initialize all surrounding tiles including the center
 async function initializeTileMap(centerLat: number, centerLng: number) {
-    const colorResponse = await fetch('./colors.json');
-    const coordinatesResponse = await fetch('./coordinates.json');
+    const colorResponse = await fetch('src/assets/colors.json');
+    const coordinatesResponse = await fetch('src/assets/coordinates.json');
     const colorsJson = await colorResponse.json();
     const coordinatesJson = await coordinatesResponse.json();
 

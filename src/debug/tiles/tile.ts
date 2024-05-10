@@ -1,5 +1,5 @@
 import * as pc from 'playcanvas';
-import { TileMap } from './TileMap';
+import { TileMap } from './tileManager';
 
 export interface TileInterface {
     getEntity: () => pc.Entity;

@@ -29,7 +29,7 @@ The directory tree should reflect the separation of concerns and encapsulation o
     │   │
     │   └── gameManager.ts      # Central game logic and state management
     │
-    └── index.ts                # Entry point of the application
+    └── main.ts                # Entry point of the application
 
 ## Naming Conventions
 For this project (and in general TypeScript, modern JavaScript environments), follow these naming conventions:
