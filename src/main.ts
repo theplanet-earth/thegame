@@ -2,124 +2,7 @@ import * as pc from 'playcanvas';
 import { Tile, TileInterface } from './debug/tiles/tile';
 import { TileMap } from './debug/tiles/tileManager';
 import { Direction, DirectionEnum } from './game/utility';
-
-// Initialization and application setup here
-async function fetchGLB(url: string): Promise<Blob> {
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.blob();
-}
-function loadGLBFromBlob(blob: Blob, onLoad: (container: pc.Entity) => void) {
-    const url = URL.createObjectURL(blob);
-    const asset = new pc.Asset('tileModel', 'container', { url: url });
-    app.assets.add(asset);
-    app.assets.load(asset);
-    asset.on('load', () => {
-        const container = asset.resource.instantiateRenderEntity();
-        onLoad(container);
-    });
-    asset.on('error', (err, asset) => {
-        console.error('Error loading asset:', err);
-    });
-}
-
-// Helper function to format the filename
-function getTileFilename(lat: number, lng: number): string {
-    var gridInterval = 0.005; // degrees, adjust size of grid cells
-    const minLat = Math.floor((lat - 41.8240) / gridInterval) * gridInterval + 41.8240;
-    const minLng = Math.floor((lng - 12.4435) / gridInterval) * gridInterval + 12.4435;
-    const maxLat = minLat + gridInterval;
-    const maxLng = minLng + gridInterval;
-
-    // Convert to a string with no decimal points
-    const minLatStr = (minLat * 10000).toFixed(0);
-    const minLngStr = (minLng * 10000).toFixed(0);
-    const maxLatStr = (maxLat * 10000).toFixed(0);
-    const maxLngStr = (maxLng * 10000).toFixed(0);
-
-    return `${minLatStr}${minLngStr}${maxLatStr}${maxLngStr}`;
-}
-
-// Function to initialize all surrounding tiles including the center
-async function initializeTileMap(centerLat: number, centerLng: number) {
-    const colorResponse = await fetch('src/assets/colors.json');
-    const coordinatesResponse = await fetch('src/assets/coordinates.json');
-    const colorsJson = await colorResponse.json();
-    const coordinatesJson = await coordinatesResponse.json();
-
-    const initColors: { [key: string]: pc.Color } = {};
-    Object.keys(colorsJson).forEach(key => {
-        const [r, g, b] = colorsJson[key];
-        initColors[key] = new pc.Color(r, g, b);
-    });
-    for (const key of Object.keys(coordinatesJson)) {
-        const [dLng, dLat] = coordinatesJson[key];
-        const lat = centerLat - dLat; //odd pc z direction (downward)
-        const lng = centerLng + dLng;
-        initializeTile(lat, lng, centerLat, centerLng, initColors[key]);
-    };
-}
-
-// Updated initialization function using dynamic coordinates
-async function initializeTile(lat: number, lng: number, centerLat: number, centerLng: number, color: pc.Color) {
-    try {
-        const filename = getTileFilename(lat, lng);
-        console.log('Coordinates received:', filename);
-        const blob = await fetchGLB(`https://nestjs-deal.vercel.app/buildings/filename/${filename}.glb`);
-        loadGLBFromBlob(blob, (modelEntity) => {
-            modelEntity.setLocalPosition(calculatePositionFromCenter(lat, lng, centerLat, centerLng));
-
-            // tmp : setting up the color for DEBUG only
-            const material = new pc.StandardMaterial();
-            material.diffuse = color;
-            material.update();
-
-            if (modelEntity.model) { // Ensure the entity has a model component               
-                // modelEntity.model.meshInstances.forEach(meshInstance => {
-                //     meshInstance.material = material;
-                // });
-                modelEntity.model.meshInstances[0].material = material;
-            } else if (modelEntity.children) {
-                modelEntity.children.forEach(child => {
-                    child.render.meshInstances.forEach(meshInstance => {
-                        meshInstance.material = material;
-                    });
-                });
-            } else {
-                console.error('Loaded entity does not have a model nor children components.');
-            }
-            app.root.addChild(modelEntity);
-        });
-    } catch (error) {
-        console.error('Failed to load Tile:', error);
-    }
-}
-
-function measure(lat1, lon1, lat2, lon2){  // generally used geo measurement function
-    var R = 6378.137; // Radius of earth in KM
-    var dLat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
-    var dLon = lon2 * Math.PI / 180 - lon1 * Math.PI / 180;
-    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    var d = R * c;
-    return d * 1000; // meters
-}
-
-// Calculate position based on Haversine formula to place each model
-function calculatePositionFromCenter(lat: number, lng: number, centerLat: number, centerLng: number): pc.Vec3 {
-    const distanceLat = measure(centerLat, centerLng, lat, centerLng);
-    const distanceLng = measure(centerLat, centerLng, centerLat, lng);
-
-    // Determine direction to place tiles correctly in relation to the center
-    const dirLat = lat > centerLat ? -1 : 1; //odd pc z direction (downward)
-    const dirLng = lng > centerLng ? 1 : -1;
-
-    return new pc.Vec3(distanceLng * dirLng, 0, distanceLat * dirLat);
-}
+import { TileManager } from './game/tiles/tileManager';
 
 // Define interfaces for better type-checking
 interface Movement {
@@ -137,10 +20,15 @@ const app: pc.Application = new pc.Application(canvas, {
 app.setCanvasResolution(pc.RESOLUTION_AUTO);
 app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
 
+// Declare tiles here so they are accessible later in the 'update' callback
+let tileMap: TileManager;
+let tiles: TileMap;
+
 app.on('initialize:coordinates', (coordinates) => {
-    console.log('Coordinates received:', coordinates);
-    // You can now use these coordinates to influence the game, such as setting an initial player position, etc.
-    initializeTileMap(coordinates.lat, coordinates.lng);
+    console.info('Coordinates received:', coordinates);
+    // Use these coordinates setting an initial player position
+    tileMap = new TileManager(app, coordinates.lat, coordinates.lng);
+    tiles = new TileMap(app);
 });
 
 app.start();
@@ -153,8 +41,6 @@ const light: pc.Entity = new pc.Entity('light');
 light.addComponent('light');
 light.setEulerAngles(45, 0, 0);
 app.root.addChild(light);
-
-const tiles = new TileMap(app);
 
 // Box setup
 const box: pc.Entity = new pc.Entity('box');
@@ -192,6 +78,11 @@ let angle: number = 0;
 
 // Update function for box movement and camera follow
 app.on('update', (dt: number): void => {
+    // Ensure tiles is initialized before using it
+    if (!tiles || !tileMap || !tiles.getTiles() || !tiles.getTile("CC")) {
+        console.warn("Tiles objects are not yet initialized.");
+        return;
+    }
     // Box movement
     const camera_height = camera.getPosition().y;
     if (app.keyboard?.isPressed(pc.KEY_W)) {

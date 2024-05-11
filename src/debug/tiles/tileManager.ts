@@ -7,7 +7,7 @@ export class TileMap {
 
     constructor(app: pc.Application) {
         this.initialize(app).then(() => {
-            console.log("TileMap initialized with tiles.");
+            console.debug("TileMap initialized with tiles.");
         }).catch(err => {
             console.error("Failed to initialize TileMap:", err);
         });
