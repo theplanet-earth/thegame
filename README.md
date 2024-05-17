@@ -1,6 +1,18 @@
 # thegame
 The Planet Game
 
+## Local environment
+To run the game on a dev environment, once the repo has been cloned into this ["alnoda" workspace](https://alnoda.org/registry/workspace/node-js-workspace/v/5-0/) run the following commands:
+
+    npm install playcanvas vite --save-dev
+    npx vite --host 0.0.0.0 --port 8026
+
+remember to turn on the environment with the following command:
+
+    docker run --name space-1 -d -p 8020-8040:8020-8040 --restart=always alnoda/nodejs-workspace
+
+then, for example, go to http://localhost:8026/@41.835751,12.496451
+
 ## Directory Tree
 The directory tree should reflect the separation of concerns and encapsulation of different functionalities. Here’s the current one:
 
