@@ -1,7 +1,7 @@
 import * as pc from 'playcanvas';
 
 export enum DirectionEnum {
-    N = "N", E = "E", S = "S", W = "W"
+    N = "n", E = "e", S = "s", W = "w"
 }
 
 export class Direction {

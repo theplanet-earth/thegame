@@ -79,7 +79,7 @@ let angle: number = 0;
 // Update function for box movement and camera follow
 app.on('update', (dt: number): void => {
     // Ensure tiles is initialized before using it
-    if (!tiles || !tileMap || !tiles.getTiles() || !tiles.getTile("CC")) {
+    if (!tiles || !tileMap || !tiles.getTiles() || !tiles.getTile("cc")) {
         console.warn("Tiles objects are not yet initialized.");
         return;
     }
@@ -140,7 +140,7 @@ app.on('update', (dt: number): void => {
 
 
     const boxPos = box.getPosition();
-    const centerPos = tiles.getTile("CC").getEntity().getPosition();
+    const centerPos = tiles.getTile("cc").getEntity().getPosition();
 
     // Determine boundary crossing
     if (Math.abs(boxPos.x - centerPos.x) > 5 || Math.abs(boxPos.z - centerPos.z) > 5) {
@@ -154,11 +154,11 @@ app.on('update', (dt: number): void => {
         // The following order is fundamental, do not mess it up
         let tmpColor: pc.Color = tiles.getTile(direction.getOpposite().repeat(2)).getColor();
         tiles.getTile(direction.getOpposite().repeat(2)).remove();
-        tiles.getTile("CC").updateKey(direction.getOpposite().repeat(2));
+        tiles.getTile("cc").updateKey(direction.getOpposite().repeat(2));
         // Update the center panel for the next frame
-        tiles.getTile(`${direction.getCurrent()}`.repeat(2)).updateKey("CC");
+        tiles.getTile(`${direction.getCurrent()}`.repeat(2)).updateKey("cc");
         
-        new Tile(`${direction.getCurrent()}`.repeat(2), tiles, app, tiles.getTile("CC").getEntity().getPosition().add(direction.getDelta()), tmpColor);
+        new Tile(`${direction.getCurrent()}`.repeat(2), tiles, app, tiles.getTile("cc").getEntity().getPosition().add(direction.getDelta()), tmpColor);
 
         for (const other of direction.getTransverse()) {
 
