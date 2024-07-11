@@ -5,8 +5,9 @@ export interface TileInterface {
     initializeTile: (lat: number, lng: number) => Promise<void>;
     fetchGLB: (url: string) => Promise<Blob>;
     loadGLBFromBlob: (blob: Blob, onLoad: (container: pc.Entity) => void) => void;
-    getTileFilename: (lat: number, lng: number) => string;
     getEntity: () => pc.Entity;
+    // getBbox:() => pc.BoundingBox;
+    getMetadata: () => any;
     getColor: () => pc.Color;
     updateKey: (newKey: string) => void;
     updatePosition: (newPosition: pc.Vec3) => void;
@@ -16,24 +17,26 @@ export interface TileInterface {
 
 export class Tile implements TileInterface {
     private entity: pc.Entity;
+    // private bbox: pc.BoundingBox;
     private color: pc.Color;
     private key: string;
+    private metadata: any;
 
     constructor(
         key: string,
         private dictionaryRef: TileManager,
         private app: pc.Application,
-        lat: number, 
-        lng: number,
         position: pc.Vec3,
+        metadata: any,
         color: pc.Color
     ) {
         this.key = key;
+        this.metadata = metadata;
         this.color = color;
         this.dictionaryRef.registerTile(key, this);
 
         // Initialize the tile and then set up the entity
-        this.initializeTile(lat, lng).then(() => {
+        this.initializeTile().then(() => {
             this.entity.setPosition(position);
             this.setupMaterial(color);
             this.app.root.addChild(this.entity);
@@ -44,12 +47,11 @@ export class Tile implements TileInterface {
     }
 
     // Initialization using dynamic coordinates
-    async initializeTile(lat: number, lng: number): Promise<void> {
+    async initializeTile(): Promise<void> {
         try {
-            const filename = this.getTileFilename(lat, lng);
-            console.debug('Coordinates received:', filename);
+            const tileTag = this.getMetadata().tile_tag;
 
-            const blob = await this.fetchGLB(`https://nestjs-deal.vercel.app/buildings/filename/${filename}.glb`);
+            const blob = await this.fetchGLB(`https://nestjs-deal.vercel.app/buildings/filename/${tileTag}.glb`);
             this.entity = await this.loadGLBFromBlob(blob);
         } catch (error) {
             console.error('Failed to load Tile:', error);
@@ -85,25 +87,16 @@ export class Tile implements TileInterface {
         });
 }
 
-    // Helper function to format the filename
-    getTileFilename(lat: number, lng: number): string {
-        var gridInterval = 0.005; // degrees, adjust size of grid cells
-        const minLat = Math.floor((lat - 41.8240) / gridInterval) * gridInterval + 41.8240;
-        const minLng = Math.floor((lng - 12.4435) / gridInterval) * gridInterval + 12.4435;
-        const maxLat = minLat + gridInterval;
-        const maxLng = minLng + gridInterval;
-
-        // Convert to a string with no decimal points
-        const minLatStr = (minLat * 10000).toFixed(0);
-        const minLngStr = (minLng * 10000).toFixed(0);
-        const maxLatStr = (maxLat * 10000).toFixed(0);
-        const maxLngStr = (maxLng * 10000).toFixed(0);
-
-        return `${minLatStr}${minLngStr}${maxLatStr}${maxLngStr}`;
-    }
-
     getEntity(): pc.Entity {
         return this.entity;
+    }
+
+    // getBbox(): pc.BoundingBox {
+    //     return this.bbox;
+    // }
+
+    getMetadata(): any {
+        return this.metadata;
     }
 
     getColor(): pc.Color {

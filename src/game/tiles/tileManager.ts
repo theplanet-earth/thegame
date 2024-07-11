@@ -16,24 +16,63 @@ export class TileManager {
     // Function to initialize all surrounding tiles including the center
     async initialize(app: pc.Application, centerLat: number, centerLng: number) {
         const colorResponse = await fetch('src/assets/colors.json');
-        const coordinateResponse = await fetch('src/assets/coordinates.json');
         const colorsJson = await colorResponse.json();
-        const coordinatesJson = await coordinateResponse.json();
 
         const initColors: { [key: string]: pc.Color } = {};
         Object.keys(colorsJson).forEach(key => {
             const [r, g, b] = colorsJson[key];
             initColors[key] = new pc.Color(r, g, b);
         });
-        Object.keys(coordinatesJson).forEach(key => {
-            // const [x, z] = coordinatesJson[key];
-            const [dLng, dLat] = coordinatesJson[key];
-            const lat = centerLat - dLat; //odd pc z direction (downward)
-            const lng = centerLng + dLng;
-            const posVec = this.relativePosition(lat, lng, centerLat, centerLng);
-            // this.registerTile(key, new Tile(key, this, app, posVec, initColors[key]));
-            new Tile(key, this, app, lat, lng, posVec, initColors[key]);
-        });
+
+        // Initialize the "cc" key tile first
+        const tileUrl = `https://nestjs-deal.vercel.app/tiles/search?lat=${centerLat}&lon=${centerLng}`;
+        const tileResponse = await fetch(tileUrl);
+        const tileJson = await tileResponse.json();
+
+        let ccMetadata;
+        let ccCoordinates;
+
+        if (tileJson && tileJson.length > 0) {
+            ccMetadata = tileJson[0];
+            ccCoordinates = this.centerCoordinates(ccMetadata.tile_coord);
+
+            new Tile('cc', this, app, pc.Vec3.ZERO, ccMetadata, initColors['cc']);
+        }
+        // Initialize all other tiles
+        for (const key of Object.keys(colorsJson)) {
+            if (key !== 'cc') {
+                // Make HTTP POST request for each tile
+                const tileUrl = `https://nestjs-deal.vercel.app/tiles/search/${key}`;
+                const tileResponse = await fetch(tileUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(ccMetadata)
+                });
+                // Log the status of the response
+                console.debug(`Response status: ${tileResponse.status}`);
+                // Check if the response is OK
+                if (!tileResponse.ok) {
+                    throw new Error(`HTTP error! status: ${tileResponse.status}`);
+                }
+                const tileJson = await tileResponse.json();
+
+                if (tileJson && tileJson.length > 0) {
+                    const tileMetadata = tileJson[0];
+                    const { minLat, minLon, maxLat, maxLon } = tileMetadata.tile_coord;
+                    const tileCoordinates = this.centerCoordinates(tileMetadata.tile_coord);
+                    const posVec = this.relativePosition(tileCoordinates.lat, tileCoordinates.lon, ccCoordinates.lat, ccCoordinates.lon);
+                    new Tile(key, this, app, posVec, tileMetadata, initColors[key]);
+                }
+            }
+        }
+    }
+
+    centerCoordinates(coords: { minLat: number, minLon: number, maxLat: number, maxLon: number }): { lat: number, lon: number } {
+        const centerLat = (coords.minLat + coords.maxLat) / 2;
+        const centerLon = (coords.minLon + coords.maxLon) / 2;
+        return { lat: centerLat, lon: centerLon };
     }
 
     // Calculate distance based on Haversine formula
