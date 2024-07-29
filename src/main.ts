@@ -170,4 +170,31 @@ app.on('update', (dt: number): void => {
             new Tile(direction.getCorner("front", other), tiles, app, tiles.getTile(`${other}`.repeat(2)).getEntity().getPosition().add(direction.getDelta()), tmpColor);
         }
     }
+    // centerMap is the tile's center position
+    const centerTile = tileMap.getTile("cc");
+    const centerMap = centerTile.getEntity().getPosition();
+    const tileCoord = centerTile.getMetadata().tile_coord;
+
+    // here to use const tileCoord.minLon is a good approx. to take into account tiles are not "squared"
+    const latSize=tileMap.measure(tileCoord.minLat, tileCoord.minLon, tileCoord.maxLat, tileCoord.minLon);
+    // here to use const tileCoord.minLat is a good approx. to take into account tiles are not "squared"
+    const lonSize=tileMap.measure(tileCoord.minLat, tileCoord.minLon, tileCoord.minLat, tileCoord.maxLon);
+
+    const latHalfWidth = latSize/2;
+    const lonHalfWidth = lonSize/2;
+
+    // Determine boundary crossing
+    if (Math.abs(boxPos.x - centerMap.x) > lonHalfWidth || Math.abs(boxPos.z - centerMap.z) > latHalfWidth) {
+        console.log('EXITED from the central tile', centerMap.x, boxPos.x, centerMap.z, boxPos.z);
+        const exit_dir: DirectionEnum = 
+                    boxPos.x - centerMap.x >   lonHalfWidth ? DirectionEnum.E :
+                    boxPos.x - centerMap.x < - lonHalfWidth ? DirectionEnum.W :
+                    boxPos.z - centerMap.z >   latHalfWidth ? DirectionEnum.S : DirectionEnum.N;
+        // Update all the panels for the next frame
+        const exit_direction: Direction = new Direction(exit_dir);
+        // Implement your logic for when the player exits the tile
+        console.log(boxPos)
+        console.log(centerMap)
+        console.log(exit_direction)
+    }
 });
