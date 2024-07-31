@@ -9,6 +9,7 @@ export interface TileInterface {
     // getBbox:() => pc.BoundingBox;
     getMetadata: () => any;
     getColor: () => pc.Color;
+    getPosition: () => pc.Vec3;
     updateKey: (newKey: string) => void;
     updatePosition: (newPosition: pc.Vec3) => void;
     updateColor: (newColor: pc.Color) => void;
@@ -20,6 +21,7 @@ export class Tile implements TileInterface {
     // private bbox: pc.BoundingBox;
     private color: pc.Color;
     private key: string;
+    private position: pc.Vec3;
     private metadata: any;
 
     constructor(
@@ -31,6 +33,7 @@ export class Tile implements TileInterface {
         color: pc.Color
     ) {
         this.key = key;
+        this.position = position;
         this.metadata = metadata;
         this.color = color;
         this.dictionaryRef.registerTile(key, this);
@@ -101,6 +104,10 @@ export class Tile implements TileInterface {
 
     getColor(): pc.Color {
         return this.color;
+    }
+
+    getPosition(): pc.Vec3 {
+        return this.position;
     }
 
     updateKey(newKey: string): void {

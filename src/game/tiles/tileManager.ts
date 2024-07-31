@@ -60,9 +60,9 @@ export class TileManager {
 
                 if (tileJson && tileJson.length > 0) {
                     const tileMetadata = tileJson[0];
-                    const { minLat, minLon, maxLat, maxLon } = tileMetadata.tile_coord;
+                    // const { minLat, minLon, maxLat, maxLon } = tileMetadata.tile_coord;
                     const tileCoordinates = this.centerCoordinates(tileMetadata.tile_coord);
-                    const posVec = this.relativePosition(tileCoordinates.lat, tileCoordinates.lon, ccCoordinates.lat, ccCoordinates.lon);
+                    const posVec = this.relativePosition(tileCoordinates.lat, tileCoordinates.lon, ccCoordinates.lat, ccCoordinates.lon).add(this.getTile("cc").getPosition());
                     new Tile(key, this, app, posVec, tileMetadata, initColors[key]);
                 }
             }

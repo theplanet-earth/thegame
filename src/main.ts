@@ -1,7 +1,8 @@
 import * as pc from 'playcanvas';
-import { Tile, TileInterface } from './debug/tiles/tile';
+import { Tile as DebugTile } from './debug/tiles/tile';
 import { TileMap } from './debug/tiles/tileManager';
 import { Direction, DirectionEnum } from './game/utility';
+import { Tile } from './game/tiles/tile';
 import { TileManager } from './game/tiles/tileManager';
 
 // Define interfaces for better type-checking
@@ -72,6 +73,38 @@ const movement: Movement = {
     rotateSpeed: 50,
     zoomSpeed: 20
 };
+
+async function handleTileUpdate(key: string, tileMap: TileManager, app: pc.Application, newColor: pc.Color) {
+    let ccMetadata = tileMap.getTile("cc").getMetadata();
+    let ccCoordinates = tileMap.centerCoordinates(ccMetadata.tile_coord);
+
+    // Make HTTP POST request for the new tile
+    const tileUrl = `https://nestjs-deal.vercel.app/tiles/search/${key}`;
+    const tileResponse = await fetch(tileUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(ccMetadata)
+    });
+
+    // Log the status of the response
+    console.debug(`Response status: ${tileResponse.status}`);
+
+    // Check if the response is OK
+    if (!tileResponse.ok) {
+        throw new Error(`HTTP error! status: ${tileResponse.status}`);
+    }
+
+    const tileJson = await tileResponse.json();
+
+    if (tileJson && tileJson.length > 0) {
+        const tileMetadata = tileJson[0];
+        const tileCoordinates = tileMap.centerCoordinates(tileMetadata.tile_coord);
+        const posVec = tileMap.relativePosition(tileCoordinates.lat, tileCoordinates.lon, ccCoordinates.lat, ccCoordinates.lon).add(tileMap.getTile("cc").getPosition());
+        new Tile(key, tileMap, app, posVec, tileMetadata, newColor);
+    }
+}
 
 // Variable outside the update function to keep track of the camera angle
 let angle: number = 0;
@@ -158,7 +191,7 @@ app.on('update', (dt: number): void => {
         // Update the center panel for the next frame
         tiles.getTile(`${direction.getCurrent()}`.repeat(2)).updateKey("cc");
         
-        new Tile(`${direction.getCurrent()}`.repeat(2), tiles, app, tiles.getTile("cc").getEntity().getPosition().add(direction.getDelta()), tmpColor);
+        new DebugTile(`${direction.getCurrent()}`.repeat(2), tiles, app, tiles.getTile("cc").getEntity().getPosition().add(direction.getDelta()), tmpColor);
 
         for (const other of direction.getTransverse()) {
 
@@ -167,7 +200,7 @@ app.on('update', (dt: number): void => {
             tiles.getTile(`${other}`.repeat(2)).updateKey(direction.getCorner("back", other));
             tiles.getTile(direction.getCorner("front", other)).updateKey(`${other}`.repeat(2));
 
-            new Tile(direction.getCorner("front", other), tiles, app, tiles.getTile(`${other}`.repeat(2)).getEntity().getPosition().add(direction.getDelta()), tmpColor);
+            new DebugTile(direction.getCorner("front", other), tiles, app, tiles.getTile(`${other}`.repeat(2)).getEntity().getPosition().add(direction.getDelta()), tmpColor);
         }
     }
     // centerMap is the tile's center position
@@ -185,7 +218,6 @@ app.on('update', (dt: number): void => {
 
     // Determine boundary crossing
     if (Math.abs(boxPos.x - centerMap.x) > lonHalfWidth || Math.abs(boxPos.z - centerMap.z) > latHalfWidth) {
-        console.log('EXITED from the central tile', centerMap.x, boxPos.x, centerMap.z, boxPos.z);
         const exit_dir: DirectionEnum = 
                     boxPos.x - centerMap.x >   lonHalfWidth ? DirectionEnum.E :
                     boxPos.x - centerMap.x < - lonHalfWidth ? DirectionEnum.W :
@@ -196,5 +228,35 @@ app.on('update', (dt: number): void => {
         console.log(boxPos)
         console.log(centerMap)
         console.log(exit_direction)
+
+        // The following order is fundamental, do not mess it up
+        let tmpColor: pc.Color = tileMap.getTile(exit_direction.getOpposite().repeat(2)).getColor();
+        tileMap.getTile(exit_direction.getOpposite().repeat(2)).remove();
+        tileMap.getTile("cc").updateKey(exit_direction.getOpposite().repeat(2));
+
+        let key = `${exit_direction.getCurrent()}`.repeat(2)
+
+        // Update the center panel for the next frame
+        tileMap.getTile(key).updateKey("cc");
+
+        // Call the async function to handle the HTTP request and tile update
+        handleTileUpdate(key, tileMap, app, tmpColor)
+        .then(() => console.log("Tile update handled successfully"))
+        .catch(error => console.error("Error handling tile update:", error));
+
+        for (const other of exit_direction.getTransverse()) {
+
+            let tmpColor = tileMap.getTile(exit_direction.getCorner("back", other)).getColor();
+            tileMap.getTile(exit_direction.getCorner("back", other)).remove();
+            tileMap.getTile(`${other}`.repeat(2)).updateKey(exit_direction.getCorner("back", other));
+
+            key = exit_direction.getCorner("front", other);
+
+            tileMap.getTile(key).updateKey(`${other}`.repeat(2));
+
+            handleTileUpdate(key, tileMap, app, tmpColor)
+            .then(() => console.log("Tile update handled successfully"))
+            .catch(error => console.error("Error handling tile update:", error));
+        }
     }
 });
