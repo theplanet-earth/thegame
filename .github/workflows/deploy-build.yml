@@ -1,0 +1,32 @@
+name: Deploy PlayCanvas Game build
+
+on:
+  push:
+    branches:
+      - pcengine_standalone  # Branch to trigger the workflow
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'  # Use a specific Node.js version
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build the game
+      run: npm run build  # Assumes "build" script is configured in package.json
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist  # Directory with your built game files
+
