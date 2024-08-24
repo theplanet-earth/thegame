@@ -26,6 +26,9 @@ jobs:
     - name: Build the game
       run: npm run build  # Assumes "build" script is configured in package.json
 
+    - name: Tell GitHub pages this is not Jekyll
+      run: echo > dist/.nojekyll # Self-hosting on GitHub pages
+
     - name: Copy index.html to 404.html
       run: cp dist/index.html dist/404.html # Workaround: SPAs on static hosting platforms
 
