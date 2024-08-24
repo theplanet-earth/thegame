@@ -14,8 +14,8 @@ export class TileMap {
     }
 
     async initialize(app: pc.Application) {
-        const colorResponse = await fetch('src/assets/colors.json');
-        const positionResponse = await fetch('src/assets/positions.json');
+        const colorResponse = await fetch('/assets/colors.json');
+        const positionResponse = await fetch('/assets/positions.json');
         const colorsJson = await colorResponse.json();
         const positionsJson = await positionResponse.json();
 

@@ -93,9 +93,7 @@ out
 
 # Nuxt.js build / generate output
 .nuxt
-dist/*
-# Self-hosting on GitHub pages
-!dist/.nojekyll
+dist
 
 # Gatsby files
 .cache/

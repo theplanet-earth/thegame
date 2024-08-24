@@ -15,7 +15,7 @@ export class TileManager {
 
     // Function to initialize all surrounding tiles including the center
     async initialize(app: pc.Application, centerLat: number, centerLng: number) {
-        const colorResponse = await fetch('src/assets/colors.json');
+        const colorResponse = await fetch('/assets/colors.json');
         const colorsJson = await colorResponse.json();
 
         const initColors: { [key: string]: pc.Color } = {};
