@@ -1,0 +1,40 @@
+name: Deploy PlayCanvas Game build
+
+on:
+  push:
+    branches:
+      - stage  # Branch to trigger the workflow
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the triggered branch
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}  # Ensures the correct branch is checked out
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'  # Use a specific Node.js version
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build the game
+      run: npm run build  # Assumes "build" script is configured in package.json
+
+    - name: Copy index.html to 404.html
+      run: cp dist/index.html dist/404.html # Workaround: SPAs on static hosting platforms
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GHPAGES_TOKEN }}
+        publish_dir: ./dist  # Directory with your built game files
+        publish_branch: gh-pages  # Specify the branch to deploy to
+        user_name: 'github-actions'  # Commit name
+        user_email: 'github-actions@github.com'  # Commit email
+        cname: 'enjoy.theplanet.wtf'  # Ensure the CNAME is set
