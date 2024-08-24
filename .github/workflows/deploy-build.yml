@@ -13,7 +13,7 @@ jobs:
     - name: Checkout the triggered branch
       uses: actions/checkout@v3
       with:
-        ref: ${{ github.ref }}  # This ensures the correct branch is checked out
+        ref: ${{ github.ref }}  # Ensures the correct branch is checked out
 
     - name: Set up Node.js
       uses: actions/setup-node@v3
@@ -29,8 +29,9 @@ jobs:
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
       with:
-        github_token: ${{ secrets.GHPAGES_TOKEN }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./dist  # Directory with your built game files
         publish_branch: gh-pages  # Specify the branch to deploy to
         user_name: 'github-actions'  # Commit name
         user_email: 'github-actions@github.com'  # Commit email
+        cname: 'enjoy.theplanet.wtf'  # Ensure the CNAME is set
