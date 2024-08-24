@@ -3,7 +3,7 @@ name: Deploy PlayCanvas Game build
 on:
   push:
     branches:
-      - pcengine_standalone  # Branch to trigger the workflow
+      - stage  # Branch to trigger the workflow
 
 jobs:
   build-and-deploy:
