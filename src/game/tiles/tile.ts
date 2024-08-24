@@ -54,8 +54,21 @@ export class Tile implements TileInterface {
         try {
             const tileTag = this.getMetadata().tile_tag;
 
-            const blob = await this.fetchGLB(`https://nestjs-deal.vercel.app/buildings/filename/${tileTag}.glb`);
-            this.entity = await this.loadGLBFromBlob(blob);
+            // Fetch and load the building GLB
+            const buildingBlob = await this.fetchGLB(`https://nestjs-deal.vercel.app/buildings/filename/${tileTag}.glb`);
+            const buildingEntity = await this.loadGLBFromBlob(buildingBlob);
+
+            // Fetch and load the highway GLB
+            const highwayBlob = await this.fetchGLB(`https://nestjs-deal.vercel.app/highways/filename/${tileTag}.glb`);
+            const highwayEntity = await this.loadGLBFromBlob(highwayBlob);
+
+            // Create a parent entity to group both buildings and highways
+            this.entity = new pc.Entity();
+
+            // Add the building and highway entities as children of the parent entity
+            this.entity.addChild(buildingEntity);
+            this.entity.addChild(highwayEntity);
+
         } catch (error) {
             console.error('Failed to load Tile:', error);
         }
