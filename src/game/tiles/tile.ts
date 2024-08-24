@@ -41,7 +41,7 @@ export class Tile implements TileInterface {
         // Initialize the tile and then set up the entity
         this.initializeTile().then(() => {
             this.entity.setPosition(position);
-            this.setupMaterial(color);
+            // this.setupMaterial(color); // for debug purpose only!
             this.app.root.addChild(this.entity);
             console.debug("Tile correctly initialized.");
         }).catch(err => {
