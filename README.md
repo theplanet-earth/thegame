@@ -31,6 +31,12 @@ To test the build process run the following commands:
 
 then, go for example to: http://localhost:8026/@41.835751,12.496451
 
+## GH Actions
+
+Every time a pull request is merge into the `stage` branch this automatically triggers a gh-action to build `thegame` into the `dist` directory and deploy it to the `gh-pages` branch. This branch is then published and it is reachable at the following URL: https://enjoy.theplanet.wtf/
+
+Pick up a location on earth to start playing, e.g. https://enjoy.theplanet.wtf/@41.835751,12.496451
+
 ## Directory tree structure
 The directory tree should reflect the separation of concerns and encapsulation of different functionalities. Here’s the current one:
 
