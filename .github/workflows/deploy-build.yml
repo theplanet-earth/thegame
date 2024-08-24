@@ -26,6 +26,9 @@ jobs:
     - name: Build the game
       run: npm run build  # Assumes "build" script is configured in package.json
 
+    - name: Copy index.html to 404.html
+      run: cp dist/index.html dist/404.html # Workaround: SPAs on static hosting platforms
+
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
       with:
