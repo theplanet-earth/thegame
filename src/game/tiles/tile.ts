@@ -62,6 +62,10 @@ export class Tile implements TileInterface {
             const highwayBlob = await this.fetchGLB(`https://nestjs-deal.vercel.app/highways/filename/${tileTag}.glb`);
             const highwayEntity = await this.loadGLBFromBlob(highwayBlob);
 
+            // Adjust the position of the highway entity
+            const offsetY = 0.1; // Adjust this value as needed
+            highwayEntity.setLocalPosition(0, offsetY, 0);
+
             // Create a parent entity to group both buildings and highways
             this.entity = new pc.Entity();
 
