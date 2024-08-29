@@ -1,11 +1,13 @@
 import * as pc from 'playcanvas';
 import { Tile } from './tile';
+import { Direction, DirectionEnum } from '../../game/utility';
 
 export class TileMap {
     private tiles: { [key: string]: Tile } = {};
-    private center: pc.Vec3;
+    private app: pc.Application;
 
     constructor(app: pc.Application) {
+        this.app = app;
         this.initialize(app).then(() => {
             console.debug("TileMap initialized with tiles.");
         }).catch(err => {
@@ -30,6 +32,27 @@ export class TileMap {
             // this.registerTile(key, new Tile(key, this, app, posVec, initColors[key]));
             new Tile(key, this, app, posVec, initColors[key]);
         });
+    }
+
+    async updateTilesOnBoundaryCross(direction: Direction): Promise<void> {
+        // The following order is fundamental, do not mess it up
+        let tmpColor: pc.Color = this.getTile(direction.getOpposite().repeat(2)).getColor();
+        this.getTile(direction.getOpposite().repeat(2)).remove();
+        this.getTile("cc").updateKey(direction.getOpposite().repeat(2));
+        // Update the center panel for the next frame
+        this.getTile(`${direction.getCurrent()}`.repeat(2)).updateKey("cc");
+        
+        new Tile(`${direction.getCurrent()}`.repeat(2), this, this.app, this.getTile("cc").getEntity().getPosition().add(direction.getDelta()), tmpColor);
+
+        for (const other of direction.getTransverse()) {
+
+            let tmpColor = this.getTile(direction.getCorner("back", other)).getColor();
+            this.getTile(direction.getCorner("back", other)).remove();
+            this.getTile(`${other}`.repeat(2)).updateKey(direction.getCorner("back", other));
+            this.getTile(direction.getCorner("front", other)).updateKey(`${other}`.repeat(2));
+
+            new Tile(direction.getCorner("front", other), this, this.app, this.getTile(`${other}`.repeat(2)).getEntity().getPosition().add(direction.getDelta()), tmpColor);
+        }
     }
 
     registerTile(key: string, tile: Tile): void {

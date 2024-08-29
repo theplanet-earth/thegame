@@ -16,12 +16,16 @@ export function getCoordinates(): { lat: number; lng: number } | null {
 // Wait for the DOM to be fully loaded
 export function setupAppEventHandlers(): void {
     document.addEventListener('appReady', (event: Event) => {
-        // Cast the event as CustomEvent with a specific detail type
-        const customEvent = event as CustomEvent<{ app: any }>;        
+        console.log('appReady event received');
+        const customEvent = event as CustomEvent<{ app: any }>;
         const app = customEvent.detail.app; // Now you have access to the app instance
         const coordinates = getCoordinates();
+        console.log('Coordinates:', coordinates);
         if (app && coordinates) {
             app.fire('initialize:coordinates', coordinates);
+            console.log('initialize:coordinates event fired');
+        } else {
+            console.error('App or coordinates are missing');
         }
     });
 }
