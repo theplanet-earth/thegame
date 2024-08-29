@@ -146,24 +146,31 @@ export class Tile implements TileInterface {
         this.dictionaryRef.deregisterTile(this.key);
     }
 
-    // tmp : setting up the color for DEBUG only
-    private setupMaterial(color: pc.Color): void {
+    private setupMaterial(color: pc.Color): void { // for debug purpose only!
         const material = new pc.StandardMaterial();
         material.diffuse = color;
         material.update();
-        if (this.entity.model) { // Ensure the entity has a model component               
-            // this.entity.model.meshInstances.forEach(meshInstance => {
-            //     meshInstance.material = material;
-            // });
-            this.entity.model.meshInstances[0].material = material;
-        } else if (this.entity.children) {
-            this.entity.children.forEach(child => {
-                child.render.meshInstances.forEach(meshInstance => {
-                    meshInstance.material = material;
-                });
+
+        // Apply material to this.entity and all its children recursively
+        this.applyMaterialToEntity(this.entity, material);
+    }
+
+    // Helper method to recursively apply material to an entity and its children
+    private applyMaterialToEntity(entity: pc.Entity, material: pc.StandardMaterial): void {
+        if (entity.render) {
+            entity.render.meshInstances.forEach(meshInstance => {
+                meshInstance.material = material;
             });
-        } else {
-            console.error('Loaded entity does not have a model nor children components.');
-        }    
+        }
+
+        if (entity.model) {
+            entity.model.meshInstances.forEach(meshInstance => {
+                meshInstance.material = material;
+            });
+        }
+
+        entity.children.forEach(child => {
+            this.applyMaterialToEntity(child, material);
+        });
     }
 }
