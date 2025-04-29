@@ -1,24 +1,27 @@
 {
-    "name": "thegame Codespace",
-    "image": "mcr.microsoft.com/devcontainers/javascript-node:18",
-    "features": {
-      "docker-in-docker": "latest"
-    },
-    "workspaceFolder": "/workspace",
-    "forwardPorts": [8026],
-    "postCreateCommand": "npm install && npm install playcanvas vite --save-dev",
-    "customizations": {
-      "vscode": {
-        "extensions": [
-          "esbenp.prettier-vscode",
-          "dbaeumer.vscode-eslint",
-          "ms-azuretools.vscode-docker"
-        ],
-        "settings": {
-          "terminal.integrated.shell.linux": "/bin/bash"
-        }
+  "name": "thegame Codespace",
+  // Use the official JS devcontainer image
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:18",
+
+  // Run as the built-in 'vscode' user
+  "remoteUser": "vscode",
+
+  // Forward your Vite port so you can preview in the browser pane
+  "forwardPorts": [8026],
+
+  // After the container is created, install your deps
+  "postCreateCommand": "npm install && npm install playcanvas vite --save-dev",
+
+  // Recommend these handy VS Code extensions
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint"
+      ],
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
       }
-    },
-    "remoteUser": "vscode"
+    }
   }
-  
+}
