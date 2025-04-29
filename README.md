@@ -1,33 +1,67 @@
-# thegame
+# thegame  
 The Planet Game
 
 ## Local development environment
-To run the game on the ["alnoda" workspace](https://alnoda.org/registry/workspace/node-js-workspace/v/5-0/) dev environment, once the repo has been cloned into this , turn it on with the following command:
 
-    docker run --name space-1 -d -p 8020-8040:8020-8040 --restart=always alnoda/nodejs-workspace
+This project uses Vite for both development and production previews.
 
-and clone the repo
+1. **Start your alnoda workspace**  
+   If you’re using the ["alnoda" Node.js workspace](https://alnoda.org/registry/workspace/node-js-workspace/v/5-0/), run:
 
+    ```bash
+    docker run --name space-1 -d \
+      -p 8020-8040:8020-8040 \
+      --restart=always \
+      alnoda/nodejs-workspace
+    ```
+
+2. **Clone the repo**  
+    ```bash
     git clone https://github.com/theplanet-earth/thegame.git
-    
-Then, run these commands:
+    cd thegame
+    ```
 
+3. **Install dependencies**  
+    ```bash
     npm install playcanvas vite --save-dev
-    npx vite --host 0.0.0.0 --port 8026
+    ```
 
-This command starts the Vite development server. It watches your files for changes and provides a fast development environment with hot module replacement (HMR). It's intended for development use, not for serving a production build.
+4. **Run the development server**  
+    ```bash
+    npx vite --host 0.0.0.0 --port 8026
+    ```
+    - **What this does**:  
+      Spins up Vite’s **dev server** directly from your source files.  
+      - Supports **Hot Module Replacement (HMR)** and on-the-fly ESM transforms.  
+      - No build step required.  
+    - **When to use**: Day-to-day development.
+
+---
 
 ## Local test build
 
-To serve a production build (the files in the dist directory) and simulate how it will behave in a production environment, run this command:
+To build and preview your production bundle:
 
+1. **Build**  
+    ```bash
+    npx vite build
+    ```
+
+2. **Preview**  
+    ```bash
     npx vite preview --host 0.0.0.0 --port 8026
+    ```
+    - **What this does**:  
+      Serves the **already-built** files in `dist/` as if on a production server.  
+    - **Why**:  
+      Verifies that your final output works before you deploy.
 
-This is useful for locally testing the build output before deploying it to a live server.
-To test the build process run the following commands:
+Alternatively, you can build and serve with any static server. For example:
 
-    npx vite build  
-    serve --single dist --listen 8026 --cors
+```bash
+npx vite build
+serve --single dist --listen 8026 --cors
+```
 
 then, go for example to: http://localhost:8026/@41.835751,12.496451
 
@@ -42,37 +76,39 @@ The directory tree should reflect the separation of concerns and encapsulation o
 
     thegame/
     │
-    ├── public/                # Public assets directory
-    │   ├── assets/            # Static files like textures, models, sounds, etc.
-    │   │   └── image.png      # PNG file accessible at /assets/image.png
-    │   ├── example.json       # JSON file accessible at /example.json
-    │   ├── .nojekyll          # Self-hosting on GitHub pages
-    │   └── favicon.ico        # Favicon file
+    ├── public/                             # Public assets directory
+    │   ├── assets/                         # Static files like textures, models, sounds, etc.
+    │   │   └── image.png                   # PNG file accessible at /assets/image.png
+    │   ├── example.json                    # JSON file accessible at /example.json
+    │   ├── .nojekyll                       # Self-hosting on GitHub pages
+    │   └── favicon.ico                     # Favicon file
     │
-    ├── src/                      # Source code
-    │   ├── core/                 # Core functionality and utility classes
-    │   │   ├── engine.ts         # Initialization and core engine functionality
-    │   │   ├── config.ts         # Game configuration settings
-    │   │   └── utility.ts        # Helper functions and utilities
-    │   ├── game/                 # Game specific entities and logic
-    │   │   ├── character/        # Character related classes
-    │   │   │   ├── character.ts  # Character logic and behaviors
-    │   │   │   └── controller.ts # Character movement control
-    │   │   ├── tiles/            # Tile management
-    │   │   │   ├── tileManager.ts# Manages loading and unloading of tiles
-    │   │   │   ├── tile.ts       # Individual tile logic
-    │   │   │   └── layers/       # Different layers within a tile
+    ├── src/                                # Source code
+    │   ├── core/                           # Core functionality and utility classes
+    │   │   ├── engine.ts                   # Initialization and core engine functionality
+    │   │   ├── config.ts                   # Game configuration settings
+    │   │   └── utility.ts                  # Helper functions and utilities
+    │   │           
+    │   ├── game/                           # Game specific entities and logic
+    │   │   ├── character/                  # Character related classes
+    │   │   │   ├── character.ts            # Character logic and behaviors
+    │   │   │   └── controller.ts           # Character movement control
+    │   │   ├── tiles/                      # Tile management
+    │   │   │   ├── tileManager.ts          # Manages loading and unloading of tiles
+    │   │   │   ├── tile.ts                 # Individual tile logic
+    │   │   │   └── layers/                 # Different layers within a tile
     │   │   │       ├── buildingsLayer.ts
     │   │   │       ├── roadsLayer.ts
     │   │   │       ├── treesLayer.ts
-    │   │   │       └── baseLayer.ts   # Base class for all layers
-    │   │   └── gameManager.ts    # Central game logic and state management
-    │   └── main.ts               # Entry point of the application
-    │
-    ├── index.html                # Main HTML file for the project
-    ├── vite.config.ts            # Vite configuration file
-    ├── package.json              # NPM dependencies and scripts
-    └── tsconfig.json             # TypeScript configuration file
+    │   │   │       └── baseLayer.ts        # Base class for all layers
+    │   │   |
+    │   │   └── gameManager.ts              # Central game logic and state management
+    │   └── main.ts                         # Entry point of the application
+    │           
+    ├── index.html                          # Main HTML file for the project
+    ├── vite.config.ts                      # Vite configuration file
+    ├── package.json                        # NPM dependencies and scripts
+    └── tsconfig.json                       # TypeScript configuration file
 
 ## Naming Conventions
 For this project (and in general TypeScript, modern JavaScript environments), follow these naming conventions:
