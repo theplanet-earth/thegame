@@ -1,10 +1,15 @@
 {
   "name": "thegame Codespace",
-  // Use the official JS devcontainer image
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:18",
 
-  // Run as the built-in 'vscode' user
-  "remoteUser": "vscode",
+  // Build from your Dockerfile (so that apt-get and npm install -g serve actually happen)
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".",
+    "args": { "VARIANT": "18" }
+  },
+
+  // Run as the built-in 'node' user
+  "remoteUser": "node",
 
   // Forward your Vite port so you can preview in the browser pane
   "forwardPorts": [8026],
