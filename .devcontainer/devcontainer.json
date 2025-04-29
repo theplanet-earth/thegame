@@ -1,0 +1,24 @@
+{
+    "name": "thegame Codespace",
+    "image": "mcr.microsoft.com/devcontainers/javascript-node:18",
+    "features": {
+      "docker-in-docker": "latest"
+    },
+    "workspaceFolder": "/workspace",
+    "forwardPorts": [8026],
+    "postCreateCommand": "npm install && npm install playcanvas vite --save-dev",
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "esbenp.prettier-vscode",
+          "dbaeumer.vscode-eslint",
+          "ms-azuretools.vscode-docker"
+        ],
+        "settings": {
+          "terminal.integrated.shell.linux": "/bin/bash"
+        }
+      }
+    },
+    "remoteUser": "vscode"
+  }
+  
