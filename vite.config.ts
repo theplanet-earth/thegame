@@ -12,6 +12,7 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',  // Allows external access for testing
     port: 8026,  // Port to run the dev server
+    open: true
   },
   resolve: {
     alias: {

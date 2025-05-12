@@ -1,0 +1,47 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "🛠  Dev: vite",
+        "type": "npm",
+        "script": "dev",
+        "group": "build",
+        "isBackground": true,
+        "presentation": {
+          "reveal": "always",
+          "panel": "shared"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "📦  Build",
+        "type": "npm",
+        "script": "build",
+        "group": "build",
+        "presentation": { "reveal": "always", "panel": "shared" },
+        "problemMatcher": []
+      },
+      {
+        "label": "👀  Preview (prod)",
+        "type": "npm",
+        "script": "preview",
+        "group": "build",
+        "isBackground": true,
+        "presentation": { "reveal": "always", "panel": "shared" },
+        "problemMatcher": []
+      },
+      {
+        "label": "🔗 Print live URL with path",
+        "type": "shell",
+        "command": "echo '👉 https://urban-space-happiness-x9xpwgw9gj5f6jv5-8026.app.github.dev/@41.835751,12.496451'",
+        "presentation": { "reveal": "always" }
+      },
+      {
+        "label": "🌐  Open /@latlon directly",
+        "type": "shell",
+        "command": "xdg-open https://urban-space-happiness-x9xpwgw9gj5f6jv5-8026.app.github.dev/@41.835751,12.496451 || open https://urban-space-happiness-x9xpwgw9gj5f6jv5-8026.app.github.dev/@41.835751,12.496451",
+        "presentation": { "reveal": "never" }
+      }   
+    ]
+  }
+  
