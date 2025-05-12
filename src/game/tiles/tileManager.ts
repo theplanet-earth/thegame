@@ -14,11 +14,11 @@ export class TileManager {
         // Start the initialization but don't return from the constructor
         this._ready = this.initialize(this.app, centerLat, centerLng)
         .then(() => {
-            console.info("TileMap initialized with tiles.");
+            console.info("TileManager initialized with tiles.");
             this.initialized = true;
         })
         .catch(err => {
-            console.error("Failed to initialize TileMap:", err);
+            console.error("Failed to initialize TileManager:", err);
             this.initialized = false;
         });
     }
