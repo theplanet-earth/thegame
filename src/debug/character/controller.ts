@@ -2,54 +2,37 @@ import * as pc from 'playcanvas';
 import { Character } from './character';
 import { Engine } from '../../core/engine';
 import { MovementConfig } from '../../core/config';
-import { TileManager } from '../tiles/tileManager';
-import { Direction, DirectionEnum } from '../utility';
+import { TileManager } from '../../game/tiles/tileManager';
+import { Direction, DirectionEnum } from '../../game/utility';
 
 export class Controller {
     private app: pc.Application;
-    private camera: pc.Entity;
     private character: Character;
+    private camera: pc.Entity;
     private movement: MovementConfig;
     private tileManager: TileManager;
-    private angle = 0;
-    private walkPressed = false;
+    private angle: number = 0; // to keep track of the camera angle
+    private floorManager?: any; // Could refine this if needed
 
     constructor(
-        engine: Engine, 
-        character: Character, 
-        movementConfig: MovementConfig, 
-        tileManager: TileManager
+        engine: Engine,
+        character: Character,
+        movementConfig: MovementConfig,
+        tileManager: TileManager,
+        floorManager?: any
     ) {
         this.app = engine.app;
-        this.camera = engine.camera;
         this.character = character;
+        this.camera = engine.camera;
         this.movement = movementConfig;
         this.tileManager = tileManager;
+        this.floorManager = floorManager;
 
-        this.setupControls();
-        this.app.on('update', this.update.bind(this));
+        this.setupUpdateLoop();
     }
 
-    private setupControls(): void {
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'ArrowDown') {
-                this.walkPressed = true;
-                this.character.interruptSpecialAnimation();
-                this.character.play('walk');
-            }
-            if (e.code === 'Space') {
-                this.character.transitionToYessiree(this.walkPressed);
-            }
-        });
-
-        window.addEventListener('keyup', (e) => {
-            if (e.code === 'ArrowDown') {
-                this.walkPressed = false;
-                if (!this.character.isSpecialPlaying()) {
-                    this.character.play('idle');
-                }
-            }
-        });
+    private setupUpdateLoop(): void {
+        this.app.on('update', this.update.bind(this));
     }
 
     private update(dt: number): void {
@@ -59,14 +42,15 @@ export class Controller {
             return;
         }
 
-        // Character movement
+        // Box movement
         this.handleMovement(dt);
         this.handleRotation(dt);
         this.handleZoom(dt);
         this.updateCameraPosition();
         if (__DEBUG__)this.printCameraPosition(); // for debug purpose only!
         
-        this.checkTileBoundary();    
+        this.checkTileBoundary();
+        if (__DEBUG__ && this.floorManager) this.checkFloorBoundary(); // for debug purpose only!
     }
 
     // Translate character and camera
@@ -170,6 +154,23 @@ export class Controller {
             const direction = new Direction(exitDir);
 
             this.tileManager.updateTilesOnBoundaryCross(direction);
+        }
+    }
+
+    private checkFloorBoundary(): void {
+        const boxPos = this.character.getPosition();
+        const centerPos = this.floorManager.getTile("cc").getEntity().getPosition();
+    
+        // Determine boundary crossing
+        if (Math.abs(boxPos.x - centerPos.x) > 5 || Math.abs(boxPos.z - centerPos.z) > 5) {
+            const dir: DirectionEnum = 
+                        boxPos.x - centerPos.x >  5 ? DirectionEnum.W : // do not make it > 0
+                        boxPos.x - centerPos.x < -5 ? DirectionEnum.E : // do not make it < 0
+                        boxPos.z - centerPos.z >  5 ? DirectionEnum.N : DirectionEnum.S; // same here ...
+            // Update all the panels for the next frame
+            const direction: Direction = new Direction(dir);
+
+            this.floorManager.updateTilesOnBoundaryCross(direction);
         }
     }
 }

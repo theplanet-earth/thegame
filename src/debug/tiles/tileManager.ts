@@ -28,7 +28,7 @@ export class TileMap {
         });
         Object.keys(positionsJson).forEach(key => {
             const [x, z] = positionsJson[key];
-            const posVec = new pc.Vec3(x, -0.5, z);
+            const posVec = new pc.Vec3(x, +0.1, z);
             // this.registerTile(key, new Tile(key, this, app, posVec, initColors[key]));
             new Tile(key, this, app, posVec, initColors[key]);
         });

@@ -1,7 +1,12 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
-export default defineConfig({
+const isDebug = process.env.DEBUG === 'true';
+
+export default defineConfig(({ mode }) => ({
+  define: {
+    __DEBUG__: JSON.stringify(isDebug),
+  },
   root: '.',  // Root directory, this is where index.html is located
   build: {
     outDir: 'dist',  // Output directory for the build
@@ -19,4 +24,4 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),  // Alias for easier imports
     },
   },
-});
+}));

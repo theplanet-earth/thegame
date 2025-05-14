@@ -88,10 +88,17 @@ The directory tree should reflect the separation of concerns and encapsulation o
     │   │   ├── engine.ts                   # Initialization and core engine functionality
     │   │   ├── config.ts                   # Game configuration settings
     │   │   └── utility.ts                  # Helper functions and utilities
-    │   │           
+    │   │
+    │   ├── debug/
+    │   │   ├── character/
+    │   │   │   ├── character.ts            ← BOX-BASED
+    │   │   │   └── controller.ts
+    │   │   └── tiles/
+    │   │       ├── tileManager.ts          ← MAGIC-FLOOR
+    │   │       └── tile.ts
     │   ├── game/                           # Game specific entities and logic
-    │   │   ├── character/                  # Character related classes
-    │   │   │   ├── character.ts            # Character logic and behaviors
+    │   │   ├── character/
+    │   │   │   ├── character.ts            ← FSM + GLB
     │   │   │   └── controller.ts           # Character movement control
     │   │   ├── tiles/                      # Tile management
     │   │   │   ├── tileManager.ts          # Manages loading and unloading of tiles
@@ -101,7 +108,7 @@ The directory tree should reflect the separation of concerns and encapsulation o
     │   │   │       ├── roadsLayer.ts
     │   │   │       ├── treesLayer.ts
     │   │   │       └── baseLayer.ts        # Base class for all layers
-    │   │   |
+    │   │   │
     │   │   └── gameManager.ts              # Central game logic and state management
     │   └── main.ts                         # Entry point of the application
     │           

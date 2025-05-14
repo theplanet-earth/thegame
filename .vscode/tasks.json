@@ -1,12 +1,36 @@
 {
-    "version": "2.0.0",
-    "tasks": [
+  "version": "2.0.0",
+  "tasks": [
       {
         "label": "🛠  Dev: vite",
-        "type": "npm",
-        "script": "dev",
+        "detail": "Run dev server (vite, DEBUG=false)",
+        "type": "shell",
+        "command": "npm run dev",
         "group": "build",
         "isBackground": true,
+        "options": {
+          "env": {
+            "DEBUG": "false"
+          }
+        },
+        "presentation": {
+          "reveal": "always",
+          "panel": "shared"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "🧪  Dev: vite (DEBUG MODE)",
+        "detail": "Run dev server (vite, DEBUG=true)",
+        "type": "shell",
+        "command": "npm run dev",
+        "group": "build",
+        "isBackground": true,
+        "options": {
+          "env": {
+            "DEBUG": "true"
+          }
+        },
         "presentation": {
           "reveal": "always",
           "panel": "shared"
