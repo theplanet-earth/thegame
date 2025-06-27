@@ -38,7 +38,7 @@ export class Engine {
         this.camera.addComponent('camera', {
             clearColor: new pc.Color(0.3, 0.3, 0.7)
         });
-        this.camera.setPosition(new pc.Vec3(0, 5, 10));
+        this.camera.setPosition(new pc.Vec3(0, 5, -10));
         this.app.root.addChild(this.camera);
     }
 

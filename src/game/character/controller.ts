@@ -13,6 +13,8 @@ export class Controller {
     private tileManager: TileManager;
     private angle = 0;
     private walkPressed = false;
+    // 🧭 Make the model face backward (180° turn)
+    private hasRotated = false;
 
     constructor(
         engine: Engine, 
@@ -59,14 +61,20 @@ export class Controller {
             return;
         }
 
+        // ⬇️ Rotate model once, after initialization
+        if (!this.hasRotated) {
+            // this.character.rotate(new pc.Vec3(0, 180, 0));
+            this.hasRotated = true;
+        }
+
         // Character movement
         this.handleMovement(dt);
         this.handleRotation(dt);
         this.handleZoom(dt);
         this.updateCameraPosition();
-        if (__DEBUG__)this.printCameraPosition(); // for debug purpose only!
-        
-        this.checkTileBoundary();    
+        if (__DEBUG__)this.printPositions(); // for debug purpose only!
+
+        this.checkTileBoundary();
     }
 
     // Translate character and camera
@@ -75,10 +83,10 @@ export class Controller {
         const moveSpeed = this.movement.speed * dt;
         const move = new pc.Vec3();
 
-        if (keyboard.isPressed(pc.KEY_W)) move.z -= moveSpeed;
-        if (keyboard.isPressed(pc.KEY_S)) move.z += moveSpeed;
-        if (keyboard.isPressed(pc.KEY_A)) move.x -= moveSpeed;
-        if (keyboard.isPressed(pc.KEY_D)) move.x += moveSpeed;
+        if (keyboard.isPressed(pc.KEY_W)) move.z += moveSpeed;
+        if (keyboard.isPressed(pc.KEY_S)) move.z -= moveSpeed;
+        if (keyboard.isPressed(pc.KEY_A)) move.x += moveSpeed;
+        if (keyboard.isPressed(pc.KEY_D)) move.x -= moveSpeed;
 
         this.character.translateLocal(move);
 
@@ -87,8 +95,15 @@ export class Controller {
         // also slightly move the camera up or down, depending on its orientation, which 
         // could inadvertently affect the y-position if the camera's orientation is not 
         // perfectly aligned with the world axes.
+        
         const cameraY = this.camera.getPosition().y;
-        this.camera.translateLocal(move);
+
+        const reverse = new pc.Vec3(0, 0, -1);
+        const camera_move = new pc.Vec3();
+
+        camera_move.mul2(move, reverse);
+
+        this.camera.translateLocal(camera_move);
         this.camera.setPosition(this.camera.getPosition().x, cameraY, this.camera.getPosition().z);
     }
 
@@ -129,13 +144,14 @@ export class Controller {
         const z = Math.cos(this.angle) * radius;
         const cameraHeight = this.camera.getPosition().y;
         // Calculate the new camera position to stay behind the box
-        this.camera.setPosition(characterPos.x + x, cameraHeight, characterPos.z + z);
+        this.camera.setPosition(characterPos.x - x, cameraHeight, characterPos.z - z);
         this.camera.lookAt(characterPos);
     }
 
-    private printCameraPosition(): void { // for debug purpose only!
+    private printPositions(): void { // for debug purpose only!
         const keyboard = this.app.keyboard;
         if (keyboard.isPressed(pc.KEY_SPACE)) {
+            console.log(this.character.getPosition());
             console.log(this.camera.getPosition());
         }
     }

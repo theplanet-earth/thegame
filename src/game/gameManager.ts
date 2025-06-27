@@ -66,7 +66,7 @@ export class GameManager {
         }
 
         const centerPosition = new pc.Vec3();
-        const position = centerPosition.add2(centerTile.getPosition(), new pc.Vec3(0, 0.5, 0));
+        const position = centerPosition.add2(centerTile.getPosition(), new pc.Vec3(0, 0.1, 0));
 
         this.character = new Character(this.engine.app, position);
         this.controller = new Controller(

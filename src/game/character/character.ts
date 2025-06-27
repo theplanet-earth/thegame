@@ -35,13 +35,13 @@ export class Character {
     }
 
     private loadModel(position: pc.Vec3): void {
-        this.app.assets.loadFromUrl('/assets/merged.glb', 'container', (err, asset) => {
-            if (err) {
+        this.app.assets.loadFromUrl('/assets/mixamo.glb', 'container', (err, asset) => {
+            if (err || !asset) {
                 console.error('Failed to load model:', err);
                 return;
             }
 
-            const container = asset.resource as pc.ContainerResource;
+            const container = asset.resource as pc.ContainerResource & { animations: pc.Asset[] };
             const modelRoot = container.instantiateModelEntity();
             modelRoot.setLocalPosition(position);
             modelRoot.setLocalScale(1, 1, 1);
@@ -55,14 +55,24 @@ export class Character {
             });
 
             this.animMap = {
-                idle: container.animations.find(a => a.name.toLowerCase().includes('animation/0'))!,
-                walk: container.animations.find(a => a.name.toLowerCase().includes('animation/1'))!,
-                yessiree: container.animations.find(a => a.name.toLowerCase().includes('animation/2'))!,
+                ascending_stairs: container.animations.find(a => a.name.toLowerCase().includes('animation/0'))!,
+                descending_stairs: container.animations.find(a => a.name.toLowerCase().includes('animation/1'))!,
+                happy_walk: container.animations.find(a => a.name.toLowerCase().includes('animation/2'))!,
+                idle: container.animations.find(a => a.name.toLowerCase().includes('animation/3'))!,
+                left_strafe_run: container.animations.find(a => a.name.toLowerCase().includes('animation/4'))!,
+                right_strafe_run: container.animations.find(a => a.name.toLowerCase().includes('animation/5'))!,
+                sad_walk: container.animations.find(a => a.name.toLowerCase().includes('animation/6'))!,
+                yessiree: container.animations.find(a => a.name.toLowerCase().includes('animation/7'))!,
+                walk: container.animations.find(a => a.name.toLowerCase().includes('animation/8'))!,
+                stop_walk: container.animations.find(a => a.name.toLowerCase().includes('animation/9'))!,
+                talking_phone: container.animations.find(a => a.name.toLowerCase().includes('animation/10'))!,
+                telling_secret: container.animations.find(a => a.name.toLowerCase().includes('animation/11'))!,
+                left_strafe_walk: container.animations.find(a => a.name.toLowerCase().includes('animation/12'))!,
+                right_strafe_walk: container.animations.find(a => a.name.toLowerCase().includes('animation/13'))!,
+                backward: container.animations.find(a => a.name.toLowerCase().includes('animation/14'))!,
+                walkup_stairs: container.animations.find(a => a.name.toLowerCase().includes('animation/15'))!,
+                texting: container.animations.find(a => a.name.toLowerCase().includes('animation/16'))!,
             };
-
-            this.animMap.idle.resource.loop = true;
-            this.animMap.walk.resource.loop = true;
-            this.animMap.yessiree.resource.loop = false;
 
             this.play('idle');
         });
@@ -82,7 +92,7 @@ export class Character {
         this.isPlayingSpecial = true;
         this.play('yessiree', 0.2, false);
 
-        const duration = this.animMap.yessiree.resource.duration;
+        const duration = (this.animMap.yessiree.resource as pc.Animation).duration;
         this.specialTimeout = setTimeout(() => {
             this.isPlayingSpecial = false;
             this.specialTimeout = null;
