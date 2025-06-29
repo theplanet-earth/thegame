@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DejaVu+Sans+Mono&family=Droid+Sans+Mono&display=swap');
+
 body {
     margin: 0;
     padding: 0;
@@ -47,8 +49,6 @@ body {
 #banner .right-logo {
     height: 48px;
 }
-
-@import url('https://fonts.googleapis.com/css2?family=DejaVu+Sans+Mono&family=Droid+Sans+Mono&display=swap');
 
 .header-link {
     display: flex;
