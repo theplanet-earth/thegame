@@ -33,7 +33,7 @@ body {
 }
 
 #banner img {
-    height: 48px;
+    height: 72px;
     margin: 0 10px;
     pointer-events: auto; /* Allow clicking the image links */
 }
@@ -46,4 +46,24 @@ body {
 
 #banner .right-logo {
     height: 48px;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=DejaVu+Sans+Mono&family=Droid+Sans+Mono&display=swap');
+
+.header-link {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    text-decoration: none;
+    pointer-events: auto;
+}
+
+.banner-header {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 2.0em;
+    line-height: 1em;
+    color: #ddd; /* Same light gray for contrast */
+    text-align: left;
+    white-space: nowrap;
+    letter-spacing: 0.35em; /* 👈 Adjust spacing here */
 }
