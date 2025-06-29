@@ -51,7 +51,7 @@ export class Character {
             // Setup animations
             this.entity.addComponent('animation', {
                 assets: container.animations,
-                activate: true,
+                activate: false, // ⛔ Don't auto-play: not to immediately play the first animation in the list.
             });
 
             this.animMap = {
