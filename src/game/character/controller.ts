@@ -32,24 +32,48 @@ export class Controller {
         this.app.on('update', this.update.bind(this));
     }
 
+    private forwardPressed = false;
+    private backwardPressed = false;
+
     private setupControls(): void {
         window.addEventListener('keydown', (e) => {
-            if (e.code === 'ArrowDown') {
-                this.walkPressed = true;
-                this.character.interruptSpecialAnimation();
-                this.character.play('walk');
-            }
-            if (e.code === 'Space') {
-                this.character.transitionToYessiree(this.walkPressed);
+            switch (e.code) {
+                case 'KeyW':
+                    if (!this.forwardPressed) {
+                        this.forwardPressed = true;
+                        this.character.interruptSpecialAnimation();
+                        this.character.play('walk');
+                    }
+                    break;
+
+                case 'KeyS':
+                    if (!this.backwardPressed) {
+                        this.backwardPressed = true;
+                        this.character.interruptSpecialAnimation();
+                        this.character.play('backward');
+                    }
+                    break;
+
+                case 'Space':
+                    this.character.transitionToYessiree(this.forwardPressed || this.backwardPressed);
+                    break;
             }
         });
 
         window.addEventListener('keyup', (e) => {
-            if (e.code === 'ArrowDown') {
-                this.walkPressed = false;
-                if (!this.character.isSpecialPlaying()) {
-                    this.character.play('idle');
-                }
+            switch (e.code) {
+                case 'KeyW':
+                    this.forwardPressed = false;
+                    break;
+
+                case 'KeyS':
+                    this.backwardPressed = false;
+                    break;
+            }
+
+            // If neither movement key is still pressed and no special is playing, go idle
+            if (!this.forwardPressed && !this.backwardPressed && !this.character.isSpecialPlaying()) {
+                this.character.play('idle');
             }
         });
     }
@@ -84,7 +108,7 @@ export class Controller {
         const move = new pc.Vec3();
 
         if (keyboard.isPressed(pc.KEY_W)) move.z += moveSpeed;
-        if (keyboard.isPressed(pc.KEY_S)) move.z -= moveSpeed;
+        if (keyboard.isPressed(pc.KEY_S)) move.z -= moveSpeed/5;
         if (keyboard.isPressed(pc.KEY_A)) move.x += moveSpeed;
         if (keyboard.isPressed(pc.KEY_D)) move.x -= moveSpeed;
 

@@ -7,8 +7,8 @@ export interface MovementConfig {
 
 // Movement details
 export const DEFAULT_MOVEMENT_CONFIG: MovementConfig = {
-    speed: 50,
-    rotateSpeed: 50,
+    speed: 1.5,
+    rotateSpeed: 25,
     zoomSpeed: 20
 };
 
