@@ -5,14 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Planet Earth</title>
     <link rel="icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/src/style/banner.css" />
 </head>
 <body>
     <script type="module">
         import { setupAppEventHandlers } from './src/core/utility.ts';
-        // Initialize the app event handlers
         setupAppEventHandlers();
     </script>
+
     <canvas id="application"></canvas>
+
+<div id="banner">
+    <!-- Left logo with link -->
+    <a href="https://rome.temple.edu/" target="_blank" rel="noopener noreferrer">
+        <img src="/assets/temple.png" alt="Temple Logo" />
+    </a>
+
+    <!-- Centered banner text -->
+    <div class="banner-text">
+        <div>🌍 Welcome to The Planet Earth – Explore, Learn, Enjoy!</div>
+        <div>Powered by Temple University Rome 🏛️❤️</div>
+    </div>
+
+    <!-- Right logo with link -->
+    <a href="https://theplanet.observer" target="_blank" rel="noopener noreferrer">
+        <img src="/assets/theplanet.png" alt="The Planet Logo" class="right-logo" />
+    </a>
+</div>
+
     <script type="module" src="src/main.ts"></script>
 </body>
 </html>
